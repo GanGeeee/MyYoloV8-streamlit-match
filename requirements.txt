@@ -38,7 +38,7 @@ narwhals==2.19.0
 networkx==3.4.2
 numpy==2.2.6
 omegaconf==2.3.0
-opencv-python==4.13.0.92
+opencv-python-headless
 packaging==26.0
 pandas==2.3.3
 parso==0.8.6

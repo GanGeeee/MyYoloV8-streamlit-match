@@ -687,8 +687,8 @@ with tab2:
         - **PIL**：图像格式转换
         
         #### 部署环境
-        - **本地化运行**：无需网络
-        - **跨平台支持**：Windows/Linux/Mac
+        - **部署至**：Streamlit Community Cloud
+        - **跨平台支持**：Windows/Linux/Mac/移动端
         """)
 
 with tab3:

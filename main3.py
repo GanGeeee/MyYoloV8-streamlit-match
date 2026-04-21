@@ -390,6 +390,7 @@ elif detection_mode == "📁 批量检测(4x4网格)":
             
             with col_left:
                 st.markdown("**📷 原图网格**")
+                original_grid = cv2.cvtColor(original_grid, cv2.COLOR_BGR2RGB)
                 st.image(original_grid, caption=f"原始图片 (共{total_files}张)", width='stretch')
                 
                 # 下载原图网格

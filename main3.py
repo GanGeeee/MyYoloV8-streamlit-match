@@ -158,7 +158,7 @@ with st.sidebar:
     st.divider()
     st.header("🎯 可检测缺陷类型")
     for idx, name in CLASS_NAMES.items():
-        icons = ["🔴", "🟠", "🟡", "🟢", "🔵"]
+        icons = ["🔴", "🟠", "🟡", "🟢", "🔵","🟣"]
         st.markdown(f"- {icons[idx]} {name}")
     
     st.divider()

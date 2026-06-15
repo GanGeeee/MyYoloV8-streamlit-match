@@ -633,21 +633,21 @@ elif detection_mode == "🎬 视频检测":
                 )
 
 # ========== 摄像头实时模式 ==========
+# ========== 摄像头实时模式（修复版） ==========
 elif detection_mode == "📹 摄像头实时":
     st.subheader("📹 实时摄像头检测")
     
-    # 检测是否在云端环境（用于显示提示）
+    # 检测是否在云端环境
     is_cloud = "STREAMLIT_CLOUD" in os.environ or os.path.exists("/mount/src")
     
     if is_cloud:
         st.info("""
         💡 **使用说明**：
-        - 点击「Start」按钮后，浏览器会请求摄像头权限，请点击「允许」
-        - 首次启动可能需要几秒钟加载模型
-        - 实时检测会在云端进行推理
+        - 点击「Start」按钮后，浏览器会请求摄像头权限
+        - 实时检测会在云端进行推理，请保持网络通畅
         """)
     
-    # 添加控制选项
+    # 控制选项
     col1, col2 = st.columns(2)
     with col1:
         conf_threshold_webcam = st.slider(
@@ -668,24 +668,55 @@ elif detection_mode == "📹 摄像头实时":
             key="webcam_iou"
         )
     
-    # 显示 FPS 选项
-    show_fps = st.checkbox("显示检测信息", value=True, key="webcam_show_fps")
+    # 创建处理类的工厂函数（新版本推荐方式）
+    class YOLOProcessor:
+        def __init__(self):
+            self.conf_threshold = conf_threshold_webcam
+            self.iou_threshold = iou_threshold_webcam
+            self.model = model
+            
+        def recv(self, frame):
+            """新版本使用 recv() 而不是 transform()"""
+            # 将视频帧转换为 numpy array
+            img = frame.to_ndarray(format="bgr24")
+            
+            # 缩小图像以提高处理速度
+            height, width = img.shape[:2]
+            if width > 640:
+                scale = 640 / width
+                new_width = int(width * scale)
+                new_height = int(height * scale)
+                img = cv2.resize(img, (new_width, new_height))
+            
+            # YOLO 检测
+            results = self.model(img, conf=self.conf_threshold, iou=self.iou_threshold)
+            
+            # 绘制检测结果
+            if results and len(results) > 0:
+                annotated_img = results[0].plot()
+                
+                # 添加检测数量信息
+                if results[0].boxes is not None:
+                    detections = len(results[0].boxes)
+                    cv2.putText(annotated_img, f"Defects: {detections}", 
+                               (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 
+                               0.7, (0, 0, 255), 2)
+            else:
+                annotated_img = img
+            
+            # 返回处理后的帧
+            return av.VideoFrame.from_ndarray(annotated_img, format="bgr24")
     
-    # 创建 WebRTC 视频流组件
-    ctx = webrtc_streamer(
+    # 创建 WebRTC 视频流组件（新版本 API）
+    webrtc_ctx = webrtc_streamer(
         key="yolo-webcam",
-        video_transformer_factory=YOLOVideoTransformer,
+        video_processor_factory=YOLOProcessor,  # 使用 video_processor_factory
         media_stream_constraints={"video": True, "audio": False},
-        async_processing=True,  # 异步处理，提高流畅度
+        async_processing=True,
     )
     
-    # 动态更新阈值
-    if ctx.video_transformer:
-        ctx.video_transformer.conf_threshold = conf_threshold_webcam
-        ctx.video_transformer.iou_threshold = iou_threshold_webcam
-    
-    # 显示状态提示
-    if ctx.state.playing:
+    # 显示状态（新版本的访问方式）
+    if webrtc_ctx.state.playing:
         st.success("✅ 摄像头已开启，实时检测中...")
         st.warning("⚠️ 点击「Stop」按钮停止摄像头")
     else:
@@ -702,11 +733,10 @@ elif detection_mode == "📹 摄像头实时":
         5. 点击 **「Stop」** 按钮关闭摄像头
         
         **注意事项：**
-        - 首次启动需要下载模型，请耐心等待
-        - 云端检测会有一定延迟，建议保持网络通畅
-        - 如果画面卡顿，可以关闭「显示检测信息」选项
+        - 首次启动需要加载模型，请耐心等待
+        - 如果画面卡顿，可以尝试关闭其他占用网络的应用
+        - 检测框会实时显示在视频画面上
         """)
-
 # ========== 项目展示区 ==========
 st.divider()
 

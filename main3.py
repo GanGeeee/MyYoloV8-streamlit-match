@@ -9,7 +9,47 @@ import tempfile
 import time
 from pathlib import Path
 import math
+from streamlit_webrtc import webrtc_streamer, VideoTransformerBase
+import av
 
+# 新增：定义摄像头处理类
+class YOLOVideoTransformer(VideoTransformerBase):
+    def __init__(self):
+        super().__init__()
+        self.conf_threshold = 0.5
+        self.iou_threshold = 0.45
+        self.model = model  # 使用全局加载的模型
+        
+    def transform(self, frame: av.VideoFrame) -> av.VideoFrame:
+        # 将视频帧转换为 numpy array
+        img = frame.to_ndarray(format="bgr24")
+        
+        # 可选：缩小图像以提高处理速度
+        height, width = img.shape[:2]
+        if width > 640:
+            scale = 640 / width
+            new_width = int(width * scale)
+            new_height = int(height * scale)
+            img = cv2.resize(img, (new_width, new_height))
+        
+        # YOLO 检测
+        results = self.model(img, conf=self.conf_threshold, iou=self.iou_threshold)
+        
+        # 绘制检测结果
+        if results and len(results) > 0:
+            annotated_img = results[0].plot()
+        else:
+            annotated_img = img
+        
+        # 添加文字信息
+        if results[0].boxes is not None:
+            detections = len(results[0].boxes)
+            cv2.putText(annotated_img, f"Defects: {detections}", 
+                       (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 
+                       0.7, (0, 0, 255), 2)
+        
+        # 返回处理后的帧
+        return av.VideoFrame.from_ndarray(annotated_img, format="bgr24")
 # ========== 页面配置 ==========
 st.set_page_config(
     page_title="轨道缺陷检测系统 - YOLOv8",
@@ -594,56 +634,78 @@ elif detection_mode == "🎬 视频检测":
 
 # ========== 摄像头实时模式 ==========
 elif detection_mode == "📹 摄像头实时":
-    st.subheader("📹 摄像头实时检测")
+    st.subheader("📹 实时摄像头检测")
     
-    camera_source = st.radio("选择摄像头来源：", ["内置摄像头", "外接摄像头/USB"])
-    camera_index = 1 if camera_source == "外接摄像头/USB" else 0
+    # 检测是否在云端环境（用于显示提示）
+    is_cloud = "STREAMLIT_CLOUD" in os.environ or os.path.exists("/mount/src")
     
-    run_camera = st.checkbox("🎥 开启摄像头", value=False)
-    show_fps = st.checkbox("显示帧率", value=True)
+    if is_cloud:
+        st.info("""
+        💡 **使用说明**：
+        - 点击「Start」按钮后，浏览器会请求摄像头权限，请点击「允许」
+        - 首次启动可能需要几秒钟加载模型
+        - 实时检测会在云端进行推理
+        """)
     
-    frame_placeholder = st.empty()
+    # 添加控制选项
+    col1, col2 = st.columns(2)
+    with col1:
+        conf_threshold_webcam = st.slider(
+            "置信度阈值", 
+            min_value=0.0, 
+            max_value=1.0, 
+            value=0.5, 
+            step=0.05,
+            key="webcam_conf"
+        )
+    with col2:
+        iou_threshold_webcam = st.slider(
+            "IOU阈值", 
+            min_value=0.0, 
+            max_value=1.0, 
+            value=0.45, 
+            step=0.05,
+            key="webcam_iou"
+        )
     
-    if run_camera:
-        cap = cv2.VideoCapture(camera_index)
+    # 显示 FPS 选项
+    show_fps = st.checkbox("显示检测信息", value=True, key="webcam_show_fps")
+    
+    # 创建 WebRTC 视频流组件
+    ctx = webrtc_streamer(
+        key="yolo-webcam",
+        video_transformer_factory=YOLOVideoTransformer,
+        media_stream_constraints={"video": True, "audio": False},
+        async_processing=True,  # 异步处理，提高流畅度
+    )
+    
+    # 动态更新阈值
+    if ctx.video_transformer:
+        ctx.video_transformer.conf_threshold = conf_threshold_webcam
+        ctx.video_transformer.iou_threshold = iou_threshold_webcam
+    
+    # 显示状态提示
+    if ctx.state.playing:
+        st.success("✅ 摄像头已开启，实时检测中...")
+        st.warning("⚠️ 点击「Stop」按钮停止摄像头")
+    else:
+        st.info("📹 点击「Start」按钮开始实时检测")
+    
+    # 添加使用说明
+    with st.expander("📖 使用说明"):
+        st.markdown("""
+        **如何使用：**
+        1. 点击上方的 **「Start」** 按钮
+        2. 浏览器会弹出摄像头权限请求，点击 **「允许」**
+        3. 等待几秒钟，看到实时画面后即可开始检测
+        4. 调整左侧的置信度阈值可以控制检测灵敏度
+        5. 点击 **「Stop」** 按钮关闭摄像头
         
-        if not cap.isOpened():
-            st.error("无法打开摄像头，请检查摄像头是否连接")
-            st.stop()
-        
-        st.info("✅ 摄像头已开启，实时检测中...")
-        st.warning("⚠️ 取消勾选上方按钮停止摄像头")
-        
-        prev_time = time.time()
-        
-        while run_camera:
-            ret, frame = cap.read()
-            if not ret:
-                break
-            
-            annotated_frame, results = detect_video_frame(
-                model, frame, conf_threshold, iou_threshold
-            )
-            
-            if show_fps:
-                curr_time = time.time()
-                fps_display = 1 / (curr_time - prev_time + 0.001)
-                prev_time = curr_time
-                cv2.putText(annotated_frame, f"FPS: {fps_display:.1f}", 
-                           (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 
-                           0.7, (0, 255, 0), 2)
-            
-            if results.boxes is not None:
-                cv2.putText(annotated_frame, f"Defects: {len(results.boxes)}", 
-                           (10, 60), cv2.FONT_HERSHEY_SIMPLEX, 
-                           0.7, (0, 0, 255), 2)
-            
-            frame_rgb = cv2.cvtColor(annotated_frame, cv2.COLOR_BGR2RGB)
-            frame_placeholder.image(frame_rgb, caption="实时检测画面", width='stretch')
-            time.sleep(0.03)
-        
-        cap.release()
-        st.info("📹 摄像头已关闭")
+        **注意事项：**
+        - 首次启动需要下载模型，请耐心等待
+        - 云端检测会有一定延迟，建议保持网络通畅
+        - 如果画面卡顿，可以关闭「显示检测信息」选项
+        """)
 
 # ========== 项目展示区 ==========
 st.divider()

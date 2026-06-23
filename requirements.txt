@@ -1,3 +1,4 @@
+opencv-python-headless
 absl-py==2.4.0
 altair==6.0.0
 antlr4-python3-runtime==4.9.3
@@ -38,7 +39,6 @@ narwhals==2.19.0
 networkx==3.4.2
 numpy==1.23.5
 omegaconf==2.3.0
-opencv-python-headless
 packaging==26.0
 pandas==2.3.3
 parso==0.8.6

@@ -158,7 +158,7 @@ def create_grid_image(images, grid_size=(4, 4), img_size=(480, 480), border_colo
 
 # ========== 检测函数 ==========
 
-def detect_image(model, image, conf_threshold=0.5, iou_threshold=0.45):
+def detect_image(model, image, conf_threshold=0.35, iou_threshold=0.30):
     """检测单张图片"""
     results = model(image, conf=conf_threshold, iou=iou_threshold, verbose=False)
     annotated_img = results[0].plot()
@@ -179,7 +179,7 @@ def detect_image(model, image, conf_threshold=0.5, iou_threshold=0.45):
     
     return annotated_img, detections, results[0]
 
-def detect_video_frame(model, frame, conf_threshold=0.5, iou_threshold=0.45):
+def detect_video_frame(model, frame, conf_threshold=0.35, iou_threshold=0.30):
     """检测视频帧"""
     results = model(frame, conf=conf_threshold, iou=iou_threshold, verbose=False)
     annotated_frame = results[0].plot()
@@ -203,8 +203,8 @@ with st.sidebar:
     
     st.divider()
     st.header("⚙️ 参数设置")
-    conf_threshold = st.slider("置信度阈值", 0.25, 0.95, 0.5, 0.05)
-    iou_threshold = st.slider("IOU阈值", 0.1, 0.9, 0.45, 0.05)
+    conf_threshold = st.slider("置信度阈值", 0.25, 0.95, 0.35, 0.05)
+    iou_threshold = st.slider("IOU阈值", 0.1, 0.9, 0.30, 0.05)
     
     st.divider()
     st.header("📊 检测模式")
@@ -654,7 +654,7 @@ elif detection_mode == "📹 摄像头实时":
             "置信度阈值", 
             min_value=0.0, 
             max_value=1.0, 
-            value=0.5, 
+            value=0.35, 
             step=0.05,
             key="webcam_conf"
         )
@@ -663,7 +663,7 @@ elif detection_mode == "📹 摄像头实时":
             "IOU阈值", 
             min_value=0.0, 
             max_value=1.0, 
-            value=0.45, 
+            value=0.30, 
             step=0.05,
             key="webcam_iou"
         )

@@ -16,8 +16,8 @@ import av
 class YOLOVideoTransformer(VideoTransformerBase):
     def __init__(self):
         super().__init__()
-        self.conf_threshold = 0.5
-        self.iou_threshold = 0.45
+        self.conf_threshold = 0.35
+        self.iou_threshold = 0.30
         self.model = model  # 使用全局加载的模型
         
     def transform(self, frame: av.VideoFrame) -> av.VideoFrame:

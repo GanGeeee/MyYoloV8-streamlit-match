@@ -123,6 +123,7 @@ RUN pip install --no-cache-dir \
     traitlets==5.14.3 \
     typing_extensions==4.15.0 \
     tzdata==2026.1 \
+    ultralytics==8.4.40 \
     ultralytics-thop==2.0.18 \
     urllib3==2.6.3 \
     watchdog==6.0.0 \

@@ -1,6 +1,6 @@
 import os
-os.environ["OPENCV_IO_ENABLE_OPENEXR"] = "1"
-os.environ["QT_QPA_PLATFORM"] = "offscreen"  # 禁用 GUI
+os.environ["LD_PRELOAD"] = ""  # 清空动态链接库预加载
+os.environ["OPENCV_HEADLESS"] = "1"
 import cv2
 import streamlit as st
 from ultralytics import YOLO

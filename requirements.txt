@@ -1,5 +1,5 @@
---no-deps streamlit-webrtc
 opencv-python-headless
+--no-deps streamlit-webrtc
 absl-py==2.4.0
 altair==6.0.0
 antlr4-python3-runtime==4.9.3

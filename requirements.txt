@@ -1,5 +1,4 @@
---no-deps ultralytics==8.4.40
-opencv-python-headless==4.11.0.86
+opencv-python-headless
 absl-py==2.4.0
 altair==6.0.0
 antlr4-python3-runtime==4.9.3
@@ -79,6 +78,7 @@ tqdm==4.67.3
 traitlets==5.14.3
 typing_extensions==4.15.0
 tzdata==2026.1
+ultralytics==8.4.40
 ultralytics-thop==2.0.18
 urllib3==2.6.3
 watchdog==6.0.0

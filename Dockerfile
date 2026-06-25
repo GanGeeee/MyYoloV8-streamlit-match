@@ -13,7 +13,7 @@ RUN apt-get update && apt-get install -y \
 WORKDIR /app
 
 # 先强制安装 opencv-python-headless
-RUN pip install --no-cache-dir --force-reinstall opencv-python-headless==4.11.0.86
+RUN pip install opencv-python-headless==4.11.0.86
 
 # 复制 requirements.txt（里面不要包含 opencv 相关行）
 COPY requirements.txt .

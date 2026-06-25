@@ -1,6 +1,9 @@
+import os
+os.environ["OPENCV_IO_ENABLE_OPENEXR"] = "1"
+os.environ["QT_QPA_PLATFORM"] = "offscreen"  # 禁用 GUI
+import cv2
 import streamlit as st
 from ultralytics import YOLO
-import cv2
 import numpy as np
 from PIL import Image
 import pandas as pd

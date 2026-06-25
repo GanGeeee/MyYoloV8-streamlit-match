@@ -138,4 +138,4 @@ COPY . .
 
 EXPOSE 8501
 
-CMD ["streamlit", "run", "main3.py", "--server.port=8501", "--server.address=0.0.0.0"]
+CMD ["streamlit", "run", "main/main3.py", "--server.port=8501", "--server.address=0.0.0.0"]

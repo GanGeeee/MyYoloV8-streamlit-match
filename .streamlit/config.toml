@@ -1,8 +1,3 @@
 [server]
 pythonVersion = "3.11"
 
-env = [
-    "OPENCV_HEADLESS=1",
-    "LD_PRELOAD=",
-    "QT_QPA_PLATFORM=offscreen"
-]

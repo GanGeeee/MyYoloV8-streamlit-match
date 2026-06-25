@@ -1,3 +1,4 @@
+--no-deps streamlit-webrtc
 opencv-python-headless
 absl-py==2.4.0
 altair==6.0.0

@@ -19,16 +19,14 @@ COPY requirements.txt .
 # ========== 关键：分步安装，确保 opencv-headless 不被覆盖 ==========
 
 # 第一步：单独安装 opencv-python-headless（不带任何依赖）
-RUN pip install --no-cache-dir --no-deps opencv-python-headless==4.11.0.86
+RUN pip install opencv-python-headless==4.11.0.86
 
-# 第二步：验证 cv2 是否可用
-RUN python -c "import cv2; print(f'OpenCV version: {cv2.__version__}')"
 
 # 第三步：安装 ultralytics（不带依赖，手动控制）
-RUN pip install --no-cache-dir --no-deps ultralytics==8.4.40
+RUN pip install  ultralytics==8.4.40
 
 # 第四步：安装 streamlit-webrtc（不带依赖，手动控制）
-RUN pip install --no-cache-dir --no-deps streamlit-webrtc==0.72.2
+RUN pip install  streamlit-webrtc==0.72.2
 
 # 第五步：安装其他所有依赖（注意：不要覆盖 opencv）
 RUN pip install --no-cache-dir \

@@ -1,8 +1,26 @@
 import os
 import sys
-# 强制使用 headless 版本
-os.environ["OPENCV_HEADLESS"] = "1"
-os.environ["QT_QPA_PLATFORM"] = "offscreen"
+import subprocess
+
+# 运行时检测并修复
+def fix_opencv():
+    try:
+        import cv2
+        # 如果有 imshow 方法，说明是完整版，需要替换
+        if hasattr(cv2, 'imshow'):
+            print("检测到完整版 OpenCV，正在切换到 headless...")
+            subprocess.check_call([
+                sys.executable, "-m", "pip", "install",
+                "--force-reinstall", "--no-deps",
+                "opencv-python-headless==4.11.0.86"
+            ])
+            print("已切换到 headless 版本，程序将重启")
+            os.execv(sys.executable, [sys.executable] + sys.argv)
+    except ImportError:
+        pass
+
+fix_opencv()
+
 import cv2
 import streamlit as st
 from ultralytics import YOLO

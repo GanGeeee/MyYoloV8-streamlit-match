@@ -74,7 +74,7 @@ torch>=2.0.0,<2.5.0
 torchvision>=0.15.0,<0.20.0
 tornado==6.5.5
 tqdm==4.67.3
-
+dgenerate-ultralytics-headless
 ultralytics-thop==2.0.18
 traitlets==5.14.3
 typing_extensions==4.15.0

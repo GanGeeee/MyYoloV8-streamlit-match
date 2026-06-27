@@ -14,7 +14,7 @@ RUN apt-get update && apt-get install -y \
 WORKDIR /app
 
 # 先复制 requirements.txt
-COPY requirements.txt .
+# COPY requirements.txt .
 
 # ========== 关键：分步安装，确保 opencv-headless 不被覆盖 ==========
 

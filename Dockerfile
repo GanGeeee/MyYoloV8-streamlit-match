@@ -23,10 +23,10 @@ RUN pip install opencv-python-headless==4.11.0.86
 
 
 # 第三步：安装 ultralytics（不带依赖，手动控制）
-RUN pip install  ultralytics==8.4.40
+RUN pip install ultralytics
 
 # 第四步：安装 streamlit-webrtc（不带依赖，手动控制）
-RUN pip install  streamlit-webrtc==0.72.2
+RUN pip install streamlit-webrtc==0.72.2
 
 # 第五步：安装其他所有依赖（注意：不要覆盖 opencv）
 RUN pip install --no-cache-dir \

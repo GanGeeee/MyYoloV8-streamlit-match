@@ -29,7 +29,7 @@ RUN pip install ultralytics
 RUN pip install streamlit-webrtc==0.72.2
 
 # 第五步：安装其他所有依赖（注意：不要覆盖 opencv）
-RUN pip install --no-cache-dir \
+RUN pip install \
     absl-py==2.4.0 \
     aioice==0.10.2 \
     aiortc==1.14.0 \
